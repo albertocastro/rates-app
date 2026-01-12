@@ -11,6 +11,7 @@ import {
   stopMonitor,
   startOverMonitor,
   runNowAction,
+  tryEmailAction,
 } from "@/lib/actions/monitor";
 import type { MonitorSession, EvaluationRun, OnboardingProfile, RateSnapshot } from "@/lib/db/schema";
 import { RateChart } from "./rate-chart";
@@ -46,11 +47,14 @@ export function StatusDashboard({
   const [loading, setLoading] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
+  const [emailSuccess, setEmailSuccess] = useState(false);
+
   const handleAction = async (
-    action: "pause" | "resume" | "stop" | "startOver" | "runNow"
+    action: "pause" | "resume" | "stop" | "startOver" | "runNow" | "tryEmail"
   ) => {
     setLoading(action);
     setError(null);
+    setEmailSuccess(false);
 
     try {
       let result;
@@ -70,11 +74,17 @@ export function StatusDashboard({
         case "runNow":
           result = await runNowAction();
           break;
+        case "tryEmail":
+          result = await tryEmailAction();
+          if (result.success) {
+            setEmailSuccess(true);
+          }
+          break;
       }
 
       if (!result.success) {
         setError(result.error || "Action failed");
-      } else {
+      } else if (action !== "tryEmail") {
         router.refresh();
       }
     } catch (err) {
@@ -105,6 +115,12 @@ export function StatusDashboard({
       {error && (
         <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
           {error}
+        </div>
+      )}
+
+      {emailSuccess && (
+        <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg text-sm">
+          Test email sent! Check your inbox.
         </div>
       )}
 
@@ -209,6 +225,14 @@ export function StatusDashboard({
                   disabled={loading !== null}
                 >
                   Run Now
+                </Button>
+                <Button
+                  variant="secondary"
+                  onClick={() => handleAction("tryEmail")}
+                  loading={loading === "tryEmail"}
+                  disabled={loading !== null}
+                >
+                  Try Email
                 </Button>
                 <Button
                   variant="danger"

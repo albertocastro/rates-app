@@ -4,6 +4,11 @@ import { getSessionById, runEvaluation } from "@/lib/services/monitor";
 /**
  * POST: Trigger evaluation for a specific session
  * Called when user clicks "Start Over" or "Run Now"
+ *
+ * Note: Vercel Workflow DevKit (workflow npm package) is currently incompatible
+ * with Next.js 16's Turbopack due to WASI module resolution issues.
+ * Using cron job approach instead (/api/cron/check-rates).
+ * Revisit when workflow package adds Turbopack support.
  */
 export async function POST(request: NextRequest) {
   try {

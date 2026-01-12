@@ -18,7 +18,7 @@ class ResendProvider implements EmailProvider {
 
   constructor() {
     this.client = new Resend(process.env.RESEND_API_KEY);
-    this.from = process.env.EMAIL_FROM || "Refi Radar <alerts@refi-radar.com>";
+    this.from = process.env.EMAIL_FROM || "Popis Interest Rates <alerts@popis.io>";
   }
 
   async send(params: {
@@ -84,8 +84,8 @@ function generateAlertEmailHtml(data: RefinanceAlertData): string {
   <title>Refinance Alert</title>
 </head>
 <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
-  <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 30px; border-radius: 10px 10px 0 0;">
-    <h1 style="color: white; margin: 0; font-size: 24px;">🎯 Time to Refinance!</h1>
+  <div style="background: #000000; padding: 30px; border-radius: 10px 10px 0 0;">
+    <h1 style="color: white; margin: 0; font-size: 24px;">🐄 Time to Refinance!</h1>
   </div>
 
   <div style="background: #f8f9fa; padding: 30px; border: 1px solid #e9ecef; border-top: none;">
@@ -94,12 +94,12 @@ function generateAlertEmailHtml(data: RefinanceAlertData): string {
     <p style="font-size: 16px;">Great news! Based on your refinance criteria, <strong>now may be a good time to shop for a new mortgage</strong>.</p>
 
     <div style="background: white; padding: 20px; border-radius: 8px; margin: 20px 0;">
-      <h3 style="margin-top: 0; color: #667eea;">Why We're Alerting You</h3>
+      <h3 style="margin-top: 0; color: #000000;">Why We're Alerting You</h3>
       <p style="margin-bottom: 0;">${data.triggeredReason}</p>
     </div>
 
     <div style="background: white; padding: 20px; border-radius: 8px; margin: 20px 0;">
-      <h3 style="margin-top: 0; color: #667eea;">Rate Comparison</h3>
+      <h3 style="margin-top: 0; color: #000000;">Rate Comparison</h3>
       <table style="width: 100%; border-collapse: collapse;">
         <tr>
           <td style="padding: 8px 0; border-bottom: 1px solid #eee;">Your Current Rate</td>
@@ -117,7 +117,7 @@ function generateAlertEmailHtml(data: RefinanceAlertData): string {
     </div>
 
     <div style="background: white; padding: 20px; border-radius: 8px; margin: 20px 0;">
-      <h3 style="margin-top: 0; color: #667eea;">Break-Even Analysis</h3>
+      <h3 style="margin-top: 0; color: #000000;">Break-Even Analysis</h3>
       <p style="margin-bottom: 0;">Based on your closing cost estimate, you would break even on refinancing costs in approximately <strong>${data.breakEvenMonths} months</strong>.</p>
     </div>
 
@@ -125,11 +125,11 @@ function generateAlertEmailHtml(data: RefinanceAlertData): string {
       <p style="margin: 0; font-size: 14px;"><strong>⚠️ Important:</strong> These are estimates based on benchmark rates. Actual rates and costs will vary by lender. We recommend getting quotes from multiple lenders before making a decision.</p>
     </div>
 
-    <p style="font-size: 14px; color: #666;">This alert was triggered by your Refi Radar monitoring settings. You can adjust your thresholds or pause monitoring in your <a href="${process.env.NEXT_PUBLIC_APP_URL}/status" style="color: #667eea;">dashboard</a>.</p>
+    <p style="font-size: 14px; color: #666;">This alert was triggered by your Popis Interest Rates monitoring settings. You can adjust your thresholds or pause monitoring in your <a href="${process.env.NEXT_PUBLIC_APP_URL}/status" style="color: #000000;">dashboard</a>.</p>
   </div>
 
   <div style="padding: 20px; text-align: center; font-size: 12px; color: #999;">
-    <p>Refi Radar - Mortgage Refinance Monitoring</p>
+    <p>🐄 Popis Interest Rates - Mortgage Refinance Monitoring</p>
     <p>Data source: Optimal Blue 30-Year Fixed Rate Mortgage Index (FRED)</p>
   </div>
 </body>
@@ -162,7 +162,7 @@ Based on your closing cost estimate, you would break even on refinancing costs i
 Important: These are estimates based on benchmark rates. Actual rates and costs will vary by lender.
 
 ---
-Refi Radar - Mortgage Refinance Monitoring
+Popis Interest Rates - Mortgage Refinance Monitoring
 Data source: Optimal Blue 30-Year Fixed Rate Mortgage Index (FRED)
 `;
 }
@@ -193,7 +193,7 @@ export async function sendRefinanceAlert(params: {
     return { sent: false };
   }
 
-  const subject = "🎯 Refi Radar Alert: Time to Shop for a Refinance!";
+  const subject = "🐄 Popis Interest Rates: Time to Shop for a Refinance!";
   const html = generateAlertEmailHtml(data);
   const text = generateAlertEmailText(data);
 
@@ -215,4 +215,67 @@ export async function sendRefinanceAlert(params: {
   });
 
   return { sent: true, emailId: result.id };
+}
+
+/**
+ * Sends a test email to verify email configuration
+ */
+export async function sendTestEmail(
+  to: string,
+  userName: string
+): Promise<{ sent: boolean; error?: string }> {
+  const subject = "🐄 Popis Interest Rates - Test Email";
+
+  const html = `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+  <div style="background: #000000; padding: 30px; border-radius: 10px 10px 0 0;">
+    <h1 style="color: white; margin: 0; font-size: 24px;">🐄 Test Email</h1>
+  </div>
+  <div style="background: #f8f9fa; padding: 30px; border: 1px solid #e9ecef; border-top: none; border-radius: 0 0 10px 10px;">
+    <p style="font-size: 16px; margin-top: 0;">Hi ${userName},</p>
+    <p style="font-size: 16px;">This is a test email from Popis Interest Rates. If you're seeing this, your email configuration is working correctly!</p>
+    <p style="font-size: 14px; color: #666; margin-bottom: 0;">You'll receive alerts at this email address when your refinance criteria are met.</p>
+  </div>
+  <div style="padding: 20px; text-align: center; font-size: 12px; color: #999;">
+    <p>🐄 Popis Interest Rates - Mortgage Refinance Monitoring</p>
+  </div>
+</body>
+</html>
+`;
+
+  const text = `
+Test Email
+
+Hi ${userName},
+
+This is a test email from Popis Interest Rates. If you're seeing this, your email configuration is working correctly!
+
+You'll receive alerts at this email address when your refinance criteria are met.
+
+---
+Popis Interest Rates - Mortgage Refinance Monitoring
+`;
+
+  try {
+    const provider = getEmailProvider();
+    const result = await provider.send({ to, subject, html, text });
+
+    if (!result) {
+      return { sent: false, error: "Email provider returned no result" };
+    }
+
+    return { sent: true };
+  } catch (error) {
+    console.error("Test email error:", error);
+    return {
+      sent: false,
+      error: error instanceof Error ? error.message : "Unknown error",
+    };
+  }
 }

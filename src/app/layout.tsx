@@ -16,7 +16,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Refi Radar - Mortgage Refinance Monitoring",
+  title: "Popis Interest Rates - Mortgage Refinance Monitoring",
   description:
     "Get notified when it's a good time to refinance your mortgage based on benchmark rates and your personal thresholds.",
 };

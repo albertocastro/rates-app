@@ -218,7 +218,7 @@ export function SettingsForm({ profile }: SettingsFormProps) {
                 onChange={(e) =>
                   updateField("emailAlertsEnabled", e.target.checked)
                 }
-                className="mr-3 h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+                className="mr-3 h-4 w-4 rounded border-gray-300 text-black focus:ring-gray-500"
               />
               <span className="text-sm text-gray-700">
                 Send me an email when my thresholds are met

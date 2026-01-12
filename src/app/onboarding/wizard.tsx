@@ -133,7 +133,7 @@ export function OnboardingWizard() {
               <div
                 className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
                   i + 1 <= step
-                    ? "bg-indigo-600 text-white"
+                    ? "bg-black text-white"
                     : "bg-gray-200 text-gray-600"
                 }`}
               >
@@ -142,7 +142,7 @@ export function OnboardingWizard() {
               {i < STEPS.length - 1 && (
                 <div
                   className={`flex-1 h-1 mx-2 ${
-                    i + 1 < step ? "bg-indigo-600" : "bg-gray-200"
+                    i + 1 < step ? "bg-black" : "bg-gray-200"
                   }`}
                 />
               )}
@@ -154,7 +154,7 @@ export function OnboardingWizard() {
             <div key={i} className="flex-1 text-center">
               <span
                 className={`text-xs ${
-                  i + 1 === step ? "text-indigo-600 font-medium" : "text-gray-500"
+                  i + 1 === step ? "text-black font-medium" : "text-gray-500"
                 }`}
               >
                 {s.title}
@@ -331,7 +331,7 @@ export function OnboardingWizard() {
                     type="checkbox"
                     checked={formData.emailAlertsEnabled}
                     onChange={(e) => updateField("emailAlertsEnabled", e.target.checked)}
-                    className="mr-3 h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+                    className="mr-3 h-4 w-4 rounded border-gray-300 text-black focus:ring-gray-500"
                   />
                   <span className="text-sm text-gray-700">
                     Send me an email when my thresholds are met

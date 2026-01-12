@@ -11,6 +11,7 @@ import {
   getEvaluationHistory,
 } from "@/lib/services/monitor";
 import { getRateHistory, RATE_SERIES } from "@/lib/services/rates";
+import { sendTestEmail } from "@/lib/services/email";
 import { revalidatePath } from "next/cache";
 
 export interface ActionResult {
@@ -163,6 +164,33 @@ export async function runNowAction(): Promise<ActionResult & { triggered?: boole
     return {
       success: false,
       error: error instanceof Error ? error.message : "Failed to run",
+    };
+  }
+}
+
+export async function tryEmailAction(): Promise<ActionResult> {
+  try {
+    const user = await getAuthenticatedUser();
+
+    if (!user.email) {
+      return { success: false, error: "No email address found for user" };
+    }
+
+    const result = await sendTestEmail(user.email, user.name || "there");
+
+    if (!result.sent) {
+      return {
+        success: false,
+        error: result.error || "Failed to send test email. Check RESEND_API_KEY."
+      };
+    }
+
+    return { success: true };
+  } catch (error) {
+    console.error("Try email error:", error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Failed to send test email",
     };
   }
 }

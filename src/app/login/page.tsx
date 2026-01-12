@@ -15,7 +15,8 @@ function LoginContent() {
     <div className="min-h-[calc(100vh-4rem)] flex items-center justify-center px-4">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
-          <CardTitle className="text-2xl">Welcome to Refi Radar</CardTitle>
+          <div className="text-4xl mb-2">🐄</div>
+          <CardTitle className="text-2xl">Welcome to Popis Interest Rates</CardTitle>
           <p className="text-gray-600 mt-2">
             Sign in to start monitoring mortgage rates
           </p>

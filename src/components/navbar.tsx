@@ -23,9 +23,10 @@ export function Navbar({ user }: NavbarProps) {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16">
           <div className="flex items-center">
-            <Link href="/" className="flex items-center">
-              <span className="text-2xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
-                Refi Radar
+            <Link href="/" className="flex items-center gap-2">
+              <span className="text-2xl">🐄</span>
+              <span className="text-2xl font-bold text-black">
+                Popis Interest Rates
               </span>
             </Link>
 
@@ -35,7 +36,7 @@ export function Navbar({ user }: NavbarProps) {
                   href="/status"
                   className={`px-3 py-2 rounded-md text-sm font-medium ${
                     isActive("/status")
-                      ? "bg-indigo-50 text-indigo-700"
+                      ? "bg-gray-100 text-black"
                       : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
                   }`}
                 >
@@ -45,7 +46,7 @@ export function Navbar({ user }: NavbarProps) {
                   href="/settings"
                   className={`px-3 py-2 rounded-md text-sm font-medium ${
                     isActive("/settings")
-                      ? "bg-indigo-50 text-indigo-700"
+                      ? "bg-gray-100 text-black"
                       : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
                   }`}
                 >
