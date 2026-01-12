@@ -1,7 +1,7 @@
 import { db, monitorSessions, evaluationRuns, users, onboardingProfiles } from "@/lib/db";
 import { eq, desc, and } from "drizzle-orm";
 import type { MonitorSessionStatus } from "@/lib/db/schema";
-import { fetchAndStoreLatestRate, RATE_SERIES } from "./rates";
+import { fetchAndStoreLatestRate } from "./rates";
 import { sendRefinanceAlert, type RefinanceAlertData } from "./email";
 import { evaluateRefinanceTriggers, profileToCalcInput } from "./refinance-calc";
 
@@ -153,7 +153,7 @@ export async function triggerWorkflowRun(sessionId: string): Promise<void> {
  */
 export async function runNow(sessionId: string): Promise<{
   triggered: boolean;
-  metrics: Record<string, unknown>;
+  evaluation: Record<string, unknown>;
 }> {
   const result = await runEvaluation(sessionId, true);
   return result;
@@ -197,7 +197,7 @@ export async function runEvaluation(
   bypassCooldown = false
 ): Promise<{
   triggered: boolean;
-  metrics: Record<string, unknown>;
+  evaluation: Record<string, unknown>;
 }> {
   // Get session with user and profile
   const session = await getSessionById(sessionId);
@@ -207,7 +207,7 @@ export async function runEvaluation(
 
   // Check session status
   if (session.status !== "active") {
-    return { triggered: false, metrics: { skipped: true, reason: session.status } };
+    return { triggered: false, evaluation: { skipped: true, reason: session.status } };
   }
 
   // Get user profile
@@ -245,7 +245,7 @@ export async function runEvaluation(
     await updateSessionStatus(sessionId, "error", {
       lastError: "Failed to fetch rate data",
     });
-    return { triggered: false, metrics: { error: "Failed to fetch rate data" } };
+    return { triggered: false, evaluation: { error: "Failed to fetch rate data" } };
   }
 
   // Update last check time
@@ -267,24 +267,18 @@ export async function runEvaluation(
     await recordEvaluationRun({
       sessionId,
       outcome: "not_triggered",
-      computedMetrics: evaluation.metrics as unknown as Record<string, unknown>,
+      computedMetrics: evaluation as unknown as Record<string, unknown>,
     });
-    return { triggered: false, metrics: evaluation.metrics as unknown as Record<string, unknown> };
+    return { triggered: false, evaluation: evaluation as unknown as Record<string, unknown> };
   }
 
   // Trigger! Send alert if email is enabled
   if (profile.emailAlertsEnabled) {
     const alertData: RefinanceAlertData = {
       userName: user.name || "there",
-      currentRate: evaluation.metrics.currentRate,
+      currentRate: evaluation.currentRate,
       benchmarkRate: rateData.value,
-      benchmarkRateThreshold: profile.benchmarkRateThreshold
-        ? parseFloat(profile.benchmarkRateThreshold)
-        : undefined,
-      estimatedNewRate: evaluation.metrics.estimatedNewRate,
-      monthlySavings: evaluation.metrics.monthlySavings,
-      breakEvenMonths: evaluation.metrics.breakEvenMonths ?? 0,
-      breakEvenThreshold: profile.breakEvenMonthsThreshold ?? undefined,
+      benchmarkRateThreshold: evaluation.benchmarkRateThreshold!,
       triggeredReason: evaluation.triggeredReason!,
     };
 
@@ -297,7 +291,7 @@ export async function runEvaluation(
     await recordEvaluationRun({
       sessionId,
       outcome: "triggered",
-      computedMetrics: evaluation.metrics as unknown as Record<string, unknown>,
+      computedMetrics: evaluation as unknown as Record<string, unknown>,
       triggeredReason: evaluation.triggeredReason ?? undefined,
       notifiedAt: emailResult.sent ? new Date() : undefined,
     });
@@ -305,7 +299,7 @@ export async function runEvaluation(
     await recordEvaluationRun({
       sessionId,
       outcome: "triggered",
-      computedMetrics: evaluation.metrics as unknown as Record<string, unknown>,
+      computedMetrics: evaluation as unknown as Record<string, unknown>,
       triggeredReason: evaluation.triggeredReason ?? undefined,
     });
   }
@@ -315,10 +309,10 @@ export async function runEvaluation(
     completedAt: new Date(),
     triggerMetadata: {
       benchmarkRate: rateData.value,
-      metrics: evaluation.metrics,
+      evaluation,
       triggeredReason: evaluation.triggeredReason,
     },
   });
 
-  return { triggered: true, metrics: evaluation.metrics as unknown as Record<string, unknown> };
+  return { triggered: true, evaluation: evaluation as unknown as Record<string, unknown> };
 }

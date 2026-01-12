@@ -63,16 +63,12 @@ export interface RefinanceAlertData {
   userName: string;
   currentRate: number;
   benchmarkRate: number;
-  benchmarkRateThreshold?: number;
-  estimatedNewRate: number;
-  monthlySavings: number;
-  breakEvenMonths: number;
-  breakEvenThreshold?: number;
+  benchmarkRateThreshold: number;
   triggeredReason: string;
 }
 
 /**
- * Generates the alert email HTML
+ * Generates the alert email HTML - simplified version
  */
 function generateAlertEmailHtml(data: RefinanceAlertData): string {
   return `
@@ -81,25 +77,20 @@ function generateAlertEmailHtml(data: RefinanceAlertData): string {
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Refinance Alert</title>
+  <title>Rate Alert</title>
 </head>
 <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
   <div style="background: #000000; padding: 30px; border-radius: 10px 10px 0 0;">
-    <h1 style="color: white; margin: 0; font-size: 24px;">🐄 Time to Refinance!</h1>
+    <h1 style="color: white; margin: 0; font-size: 24px;">🐄 Rate Alert!</h1>
   </div>
 
   <div style="background: #f8f9fa; padding: 30px; border: 1px solid #e9ecef; border-top: none;">
     <p style="font-size: 16px; margin-top: 0;">Hi ${data.userName},</p>
 
-    <p style="font-size: 16px;">Great news! Based on your refinance criteria, <strong>now may be a good time to shop for a new mortgage</strong>.</p>
+    <p style="font-size: 16px;">Good news! The benchmark mortgage rate has dropped to a level you were watching.</p>
 
     <div style="background: white; padding: 20px; border-radius: 8px; margin: 20px 0;">
-      <h3 style="margin-top: 0; color: #000000;">Why We're Alerting You</h3>
-      <p style="margin-bottom: 0;">${data.triggeredReason}</p>
-    </div>
-
-    <div style="background: white; padding: 20px; border-radius: 8px; margin: 20px 0;">
-      <h3 style="margin-top: 0; color: #000000;">Rate Comparison</h3>
+      <h3 style="margin-top: 0; color: #000000;">Rate Update</h3>
       <table style="width: 100%; border-collapse: collapse;">
         <tr>
           <td style="padding: 8px 0; border-bottom: 1px solid #eee;">Your Current Rate</td>
@@ -110,26 +101,23 @@ function generateAlertEmailHtml(data: RefinanceAlertData): string {
           <td style="padding: 8px 0; border-bottom: 1px solid #eee; text-align: right; font-weight: bold; color: #28a745;">${data.benchmarkRate.toFixed(3)}%</td>
         </tr>
         <tr>
-          <td style="padding: 8px 0;">Estimated Monthly Savings</td>
-          <td style="padding: 8px 0; text-align: right; font-weight: bold; color: #28a745;">$${data.monthlySavings.toFixed(2)}</td>
+          <td style="padding: 8px 0;">Your Threshold</td>
+          <td style="padding: 8px 0; text-align: right; font-weight: bold;">${data.benchmarkRateThreshold.toFixed(3)}%</td>
         </tr>
       </table>
     </div>
 
-    <div style="background: white; padding: 20px; border-radius: 8px; margin: 20px 0;">
-      <h3 style="margin-top: 0; color: #000000;">Break-Even Analysis</h3>
-      <p style="margin-bottom: 0;">Based on your closing cost estimate, you would break even on refinancing costs in approximately <strong>${data.breakEvenMonths} months</strong>.</p>
-    </div>
+    <p style="font-size: 16px;">This might be a good time to explore refinancing options with lenders.</p>
 
     <div style="background: #fff3cd; padding: 15px; border-radius: 8px; margin: 20px 0; border: 1px solid #ffc107;">
-      <p style="margin: 0; font-size: 14px;"><strong>⚠️ Important:</strong> These are estimates based on benchmark rates. Actual rates and costs will vary by lender. We recommend getting quotes from multiple lenders before making a decision.</p>
+      <p style="margin: 0; font-size: 14px;"><strong>Note:</strong> This is a benchmark rate. Actual rates will vary by lender and your credit profile. We recommend getting quotes from multiple lenders.</p>
     </div>
 
-    <p style="font-size: 14px; color: #666;">This alert was triggered by your Popis Interest Rates monitoring settings. You can adjust your thresholds or pause monitoring in your <a href="${process.env.NEXT_PUBLIC_APP_URL}/status" style="color: #000000;">dashboard</a>.</p>
+    <p style="font-size: 14px; color: #666;">You can adjust your threshold or pause monitoring in your <a href="${process.env.NEXT_PUBLIC_APP_URL}/status" style="color: #000000;">dashboard</a>.</p>
   </div>
 
   <div style="padding: 20px; text-align: center; font-size: 12px; color: #999;">
-    <p>🐄 Popis Interest Rates - Mortgage Refinance Monitoring</p>
+    <p>🐄 Popis Interest Rates - Mortgage Rate Monitoring</p>
     <p>Data source: Optimal Blue 30-Year Fixed Rate Mortgage Index (FRED)</p>
   </div>
 </body>
@@ -142,27 +130,23 @@ function generateAlertEmailHtml(data: RefinanceAlertData): string {
  */
 function generateAlertEmailText(data: RefinanceAlertData): string {
   return `
-Time to Refinance!
+Rate Alert!
 
 Hi ${data.userName},
 
-Great news! Based on your refinance criteria, now may be a good time to shop for a new mortgage.
+Good news! The benchmark mortgage rate has dropped to a level you were watching.
 
-Why We're Alerting You:
-${data.triggeredReason}
-
-Rate Comparison:
+Rate Update:
 - Your Current Rate: ${data.currentRate.toFixed(3)}%
 - Current Benchmark Rate: ${data.benchmarkRate.toFixed(3)}%
-- Estimated Monthly Savings: $${data.monthlySavings.toFixed(2)}
+- Your Threshold: ${data.benchmarkRateThreshold.toFixed(3)}%
 
-Break-Even Analysis:
-Based on your closing cost estimate, you would break even on refinancing costs in approximately ${data.breakEvenMonths} months.
+This might be a good time to explore refinancing options with lenders.
 
-Important: These are estimates based on benchmark rates. Actual rates and costs will vary by lender.
+Note: This is a benchmark rate. Actual rates will vary by lender and your credit profile.
 
 ---
-Popis Interest Rates - Mortgage Refinance Monitoring
+Popis Interest Rates - Mortgage Rate Monitoring
 Data source: Optimal Blue 30-Year Fixed Rate Mortgage Index (FRED)
 `;
 }
@@ -193,7 +177,7 @@ export async function sendRefinanceAlert(params: {
     return { sent: false };
   }
 
-  const subject = "🐄 Popis Interest Rates: Time to Shop for a Refinance!";
+  const subject = "🐄 Popis Interest Rates: Benchmark Rate Hit Your Target!";
   const html = generateAlertEmailHtml(data);
   const text = generateAlertEmailText(data);
 
@@ -240,10 +224,10 @@ export async function sendTestEmail(
   <div style="background: #f8f9fa; padding: 30px; border: 1px solid #e9ecef; border-top: none; border-radius: 0 0 10px 10px;">
     <p style="font-size: 16px; margin-top: 0;">Hi ${userName},</p>
     <p style="font-size: 16px;">This is a test email from Popis Interest Rates. If you're seeing this, your email configuration is working correctly!</p>
-    <p style="font-size: 14px; color: #666; margin-bottom: 0;">You'll receive alerts at this email address when your refinance criteria are met.</p>
+    <p style="font-size: 14px; color: #666; margin-bottom: 0;">You'll receive alerts at this email address when the benchmark rate hits your threshold.</p>
   </div>
   <div style="padding: 20px; text-align: center; font-size: 12px; color: #999;">
-    <p>🐄 Popis Interest Rates - Mortgage Refinance Monitoring</p>
+    <p>🐄 Popis Interest Rates - Mortgage Rate Monitoring</p>
   </div>
 </body>
 </html>
@@ -256,10 +240,10 @@ Hi ${userName},
 
 This is a test email from Popis Interest Rates. If you're seeing this, your email configuration is working correctly!
 
-You'll receive alerts at this email address when your refinance criteria are met.
+You'll receive alerts at this email address when the benchmark rate hits your threshold.
 
 ---
-Popis Interest Rates - Mortgage Refinance Monitoring
+Popis Interest Rates - Mortgage Rate Monitoring
 `;
 
   try {

@@ -19,16 +19,10 @@ export function SettingsForm({ profile }: SettingsFormProps) {
   const [success, setSuccess] = useState(false);
 
   const [formData, setFormData] = useState<SettingsFormData>({
-    closingCostType: profile.closingCostDollars ? "dollars" : "percent",
-    closingCostValue: profile.closingCostDollars
-      ? parseFloat(profile.closingCostDollars)
-      : profile.closingCostPercent
-      ? parseFloat(profile.closingCostPercent)
-      : 2,
+    currentRate: parseFloat(profile.currentRate),
     benchmarkRateThreshold: profile.benchmarkRateThreshold
       ? parseFloat(profile.benchmarkRateThreshold)
-      : null,
-    breakEvenMonthsThreshold: profile.breakEvenMonthsThreshold ?? null,
+      : 5.5,
     emailAlertsEnabled: profile.emailAlertsEnabled,
   });
 
@@ -67,93 +61,10 @@ export function SettingsForm({ profile }: SettingsFormProps) {
   return (
     <form onSubmit={handleSubmit}>
       <div className="space-y-6">
-        {/* Loan Summary (read-only) */}
+        {/* Alert Settings */}
         <Card>
           <CardHeader>
-            <CardTitle>Loan Summary</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid sm:grid-cols-3 gap-4 text-sm">
-              <div>
-                <p className="text-gray-500">Loan Balance</p>
-                <p className="font-medium">
-                  ${parseFloat(profile.loanBalance).toLocaleString()}
-                </p>
-              </div>
-              <div>
-                <p className="text-gray-500">Current Rate</p>
-                <p className="font-medium">
-                  {parseFloat(profile.currentRate).toFixed(3)}%
-                </p>
-              </div>
-              <div>
-                <p className="text-gray-500">Remaining Term</p>
-                <p className="font-medium">
-                  {Math.floor(profile.remainingTermMonths / 12)} years{" "}
-                  {profile.remainingTermMonths % 12} months
-                </p>
-              </div>
-            </div>
-            <p className="text-xs text-gray-400 mt-4">
-              To update loan details, please start over from the dashboard.
-            </p>
-          </CardContent>
-        </Card>
-
-        {/* Closing Costs */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Closing Cost Estimate</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex gap-4 mb-4">
-              <label className="flex items-center">
-                <input
-                  type="radio"
-                  name="closingCostType"
-                  value="percent"
-                  checked={formData.closingCostType === "percent"}
-                  onChange={() => updateField("closingCostType", "percent")}
-                  className="mr-2"
-                />
-                Percentage of loan
-              </label>
-              <label className="flex items-center">
-                <input
-                  type="radio"
-                  name="closingCostType"
-                  value="dollars"
-                  checked={formData.closingCostType === "dollars"}
-                  onChange={() => updateField("closingCostType", "dollars")}
-                  className="mr-2"
-                />
-                Fixed dollar amount
-              </label>
-            </div>
-            <Input
-              type="number"
-              name="closingCostValue"
-              step={formData.closingCostType === "percent" ? "0.1" : "100"}
-              placeholder={
-                formData.closingCostType === "percent" ? "e.g., 2" : "e.g., 7000"
-              }
-              value={formData.closingCostValue || ""}
-              onChange={(e) =>
-                updateField("closingCostValue", parseFloat(e.target.value) || 0)
-              }
-              hint={
-                formData.closingCostType === "percent"
-                  ? "Typical range: 2-5% of loan amount"
-                  : "Estimated total closing costs in dollars"
-              }
-            />
-          </CardContent>
-        </Card>
-
-        {/* Alert Thresholds */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Alert Thresholds</CardTitle>
+            <CardTitle>Rate Alert Settings</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             {error && (
@@ -167,40 +78,33 @@ export function SettingsForm({ profile }: SettingsFormProps) {
               </div>
             )}
 
-            <p className="text-sm text-gray-600">
-              Set at least one threshold. You'll be notified when either condition
-              is met.
-            </p>
+            <Input
+              label="Your Current Interest Rate (%)"
+              type="number"
+              name="currentRate"
+              step="0.001"
+              placeholder="e.g., 6.5"
+              value={formData.currentRate || ""}
+              onChange={(e) =>
+                updateField("currentRate", parseFloat(e.target.value) || 0)
+              }
+              hint="The annual interest rate on your current mortgage"
+            />
 
             <Input
-              label="Benchmark Rate Threshold (%)"
+              label="Alert Threshold (%)"
               type="number"
               name="benchmarkRateThreshold"
               step="0.001"
               placeholder="e.g., 5.5"
-              value={formData.benchmarkRateThreshold ?? ""}
+              value={formData.benchmarkRateThreshold || ""}
               onChange={(e) =>
                 updateField(
                   "benchmarkRateThreshold",
-                  e.target.value ? parseFloat(e.target.value) : null
+                  parseFloat(e.target.value) || 0
                 )
               }
               hint="Alert me when the 30-year benchmark rate falls to or below this level"
-            />
-
-            <Input
-              label="Break-Even Months Threshold"
-              type="number"
-              name="breakEvenMonthsThreshold"
-              placeholder="e.g., 24"
-              value={formData.breakEvenMonthsThreshold ?? ""}
-              onChange={(e) =>
-                updateField(
-                  "breakEvenMonthsThreshold",
-                  e.target.value ? parseInt(e.target.value) : null
-                )
-              }
-              hint="Alert me when I can recoup closing costs within this many months"
             />
           </CardContent>
         </Card>
@@ -221,7 +125,7 @@ export function SettingsForm({ profile }: SettingsFormProps) {
                 className="mr-3 h-4 w-4 rounded border-gray-300 text-black focus:ring-gray-500"
               />
               <span className="text-sm text-gray-700">
-                Send me an email when my thresholds are met
+                Send me an email when my threshold is met
               </span>
             </label>
           </CardContent>

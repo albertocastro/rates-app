@@ -7,16 +7,10 @@ import { getAuthenticatedUser } from "@/lib/auth";
 import { createMonitorSession, triggerWorkflowRun } from "@/lib/services/monitor";
 import { revalidatePath } from "next/cache";
 
-// Validation schema for onboarding
+// Simplified validation schema - just current rate and threshold
 const onboardingSchema = z.object({
-  loanBalance: z.coerce.number().min(1000).max(10000000),
   currentRate: z.coerce.number().min(0.1).max(20),
-  remainingTermMonths: z.coerce.number().int().min(1).max(480),
-  expectedTimeInHomeYears: z.coerce.number().int().min(1).max(40),
-  closingCostType: z.enum(["dollars", "percent"]),
-  closingCostValue: z.coerce.number().min(0),
-  benchmarkRateThreshold: z.coerce.number().min(0.1).max(20).optional(),
-  breakEvenMonthsThreshold: z.coerce.number().int().min(1).max(360).optional(),
+  benchmarkRateThreshold: z.coerce.number().min(0.1).max(20),
   emailAlertsEnabled: z.boolean().default(true),
 });
 
@@ -35,14 +29,6 @@ export async function submitOnboarding(formData: OnboardingFormData): Promise<Ac
     // Validate input
     const validated = onboardingSchema.parse(formData);
 
-    // Ensure at least one threshold is set
-    if (!validated.benchmarkRateThreshold && !validated.breakEvenMonthsThreshold) {
-      return {
-        success: false,
-        error: "At least one alert threshold must be set",
-      };
-    }
-
     // Check if user already has a profile
     const existingProfile = await db
       .select()
@@ -52,21 +38,16 @@ export async function submitOnboarding(formData: OnboardingFormData): Promise<Ac
 
     const profileData = {
       userId: user.id,
-      loanBalance: validated.loanBalance.toString(),
       currentRate: validated.currentRate.toString(),
-      remainingTermMonths: validated.remainingTermMonths,
-      expectedTimeInHomeYears: validated.expectedTimeInHomeYears,
-      closingCostDollars:
-        validated.closingCostType === "dollars"
-          ? validated.closingCostValue.toString()
-          : null,
-      closingCostPercent:
-        validated.closingCostType === "percent"
-          ? validated.closingCostValue.toString()
-          : null,
-      benchmarkRateThreshold: validated.benchmarkRateThreshold?.toString() ?? null,
-      breakEvenMonthsThreshold: validated.breakEvenMonthsThreshold ?? null,
+      benchmarkRateThreshold: validated.benchmarkRateThreshold.toString(),
       emailAlertsEnabled: validated.emailAlertsEnabled,
+      // Set defaults for unused fields (DB columns still exist)
+      loanBalance: "0",
+      remainingTermMonths: 360,
+      expectedTimeInHomeYears: 7,
+      closingCostDollars: null,
+      closingCostPercent: null,
+      breakEvenMonthsThreshold: null,
       updatedAt: new Date(),
     };
 

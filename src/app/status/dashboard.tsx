@@ -175,25 +175,22 @@ export function StatusDashboard({
               </h4>
               <p className="text-blue-800 text-sm">
                 {(triggerMeta.triggeredReason as string) ||
-                  "Your refinance criteria were met."}
+                  "Your rate threshold was met."}
               </p>
-              <div className="mt-3 grid grid-cols-2 gap-4 text-sm">
-                <div>
-                  <span className="text-blue-600">Benchmark Rate:</span>{" "}
-                  <span className="font-medium">
-                    {typeof triggerMeta.benchmarkRate === "number"
-                      ? `${triggerMeta.benchmarkRate.toFixed(3)}%`
-                      : "—"}
-                  </span>
-                </div>
-                <div>
-                  <span className="text-blue-600">Triggered:</span>{" "}
-                  <span className="font-medium">
-                    {session.completedAt
-                      ? format(new Date(session.completedAt), "MMM d, yyyy")
-                      : "—"}
-                  </span>
-                </div>
+              <div className="mt-3 text-sm">
+                <span className="text-blue-600">Benchmark Rate:</span>{" "}
+                <span className="font-medium">
+                  {typeof triggerMeta.benchmarkRate === "number"
+                    ? `${triggerMeta.benchmarkRate.toFixed(3)}%`
+                    : "—"}
+                </span>
+                <span className="mx-3 text-blue-300">|</span>
+                <span className="text-blue-600">Triggered:</span>{" "}
+                <span className="font-medium">
+                  {session.completedAt
+                    ? format(new Date(session.completedAt), "MMM d, yyyy")
+                    : "—"}
+                </span>
               </div>
             </div>
           )}
@@ -280,12 +277,12 @@ export function StatusDashboard({
         </CardContent>
       </Card>
 
-      {/* Thresholds Card */}
+      {/* Threshold Card - Simplified */}
       {profile && (
         <Card>
           <CardHeader>
             <div className="flex items-center justify-between">
-              <CardTitle>Your Thresholds</CardTitle>
+              <CardTitle>Your Alert Settings</CardTitle>
               <Button variant="ghost" size="sm" onClick={() => router.push("/settings")}>
                 Edit
               </Button>
@@ -294,25 +291,20 @@ export function StatusDashboard({
           <CardContent>
             <div className="grid md:grid-cols-2 gap-6">
               <div className="p-4 bg-gray-50 rounded-lg">
-                <p className="text-sm text-gray-500 mb-1">Benchmark Rate Threshold</p>
+                <p className="text-sm text-gray-500 mb-1">Your Current Rate</p>
+                <p className="text-2xl font-bold text-gray-900">
+                  {parseFloat(profile.currentRate).toFixed(3)}%
+                </p>
+              </div>
+              <div className="p-4 bg-gray-50 rounded-lg">
+                <p className="text-sm text-gray-500 mb-1">Alert Threshold</p>
                 <p className="text-2xl font-bold text-gray-900">
                   {profile.benchmarkRateThreshold
                     ? `${parseFloat(profile.benchmarkRateThreshold).toFixed(3)}%`
                     : "Not set"}
                 </p>
                 <p className="text-xs text-gray-500 mt-1">
-                  Alert when rate falls to or below this
-                </p>
-              </div>
-              <div className="p-4 bg-gray-50 rounded-lg">
-                <p className="text-sm text-gray-500 mb-1">Break-Even Threshold</p>
-                <p className="text-2xl font-bold text-gray-900">
-                  {profile.breakEvenMonthsThreshold
-                    ? `${profile.breakEvenMonthsThreshold} months`
-                    : "Not set"}
-                </p>
-                <p className="text-xs text-gray-500 mt-1">
-                  Alert when break-even period is this or shorter
+                  Alert when benchmark falls to or below this
                 </p>
               </div>
             </div>
@@ -402,8 +394,8 @@ export function StatusDashboard({
                           </span>
                         </td>
                         <td className="py-2 px-3">
-                          {metrics?.estimatedNewRate
-                            ? `${(metrics.estimatedNewRate as number).toFixed(3)}%`
+                          {metrics?.benchmarkRate
+                            ? `${(metrics.benchmarkRate as number).toFixed(3)}%`
                             : "—"}
                         </td>
                         <td className="py-2 px-3 text-gray-600 max-w-xs truncate">

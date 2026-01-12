@@ -7,11 +7,10 @@ import { getAuthenticatedUser } from "@/lib/auth";
 import { getCurrentSession } from "@/lib/services/monitor";
 import { revalidatePath } from "next/cache";
 
+// Simplified settings schema - just threshold and email preference
 const settingsSchema = z.object({
-  closingCostType: z.enum(["dollars", "percent"]),
-  closingCostValue: z.coerce.number().min(0),
-  benchmarkRateThreshold: z.coerce.number().min(0.1).max(20).optional().nullable(),
-  breakEvenMonthsThreshold: z.coerce.number().int().min(1).max(360).optional().nullable(),
+  currentRate: z.coerce.number().min(0.1).max(20),
+  benchmarkRateThreshold: z.coerce.number().min(0.1).max(20),
   emailAlertsEnabled: z.boolean(),
 });
 
@@ -29,28 +28,12 @@ export async function updateSettings(formData: SettingsFormData): Promise<Action
     // Validate input
     const validated = settingsSchema.parse(formData);
 
-    // Ensure at least one threshold is set
-    if (!validated.benchmarkRateThreshold && !validated.breakEvenMonthsThreshold) {
-      return {
-        success: false,
-        error: "At least one alert threshold must be set",
-      };
-    }
-
     // Update profile
     await db
       .update(onboardingProfiles)
       .set({
-        closingCostDollars:
-          validated.closingCostType === "dollars"
-            ? validated.closingCostValue.toString()
-            : null,
-        closingCostPercent:
-          validated.closingCostType === "percent"
-            ? validated.closingCostValue.toString()
-            : null,
-        benchmarkRateThreshold: validated.benchmarkRateThreshold?.toString() ?? null,
-        breakEvenMonthsThreshold: validated.breakEvenMonthsThreshold ?? null,
+        currentRate: validated.currentRate.toString(),
+        benchmarkRateThreshold: validated.benchmarkRateThreshold.toString(),
         emailAlertsEnabled: validated.emailAlertsEnabled,
         updatedAt: new Date(),
       })
